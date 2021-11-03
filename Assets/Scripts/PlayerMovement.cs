@@ -27,8 +27,9 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Ground Collision Variables")]
     [SerializeField] private float _groundRaycastLength;
+    [SerializeField] private bool _onGround;
     [SerializeField] private Vector3 _groundRaycastOffset;
-    public bool _onGround;
+
 
     private void Start()
     {
