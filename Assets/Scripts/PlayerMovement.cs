@@ -23,7 +23,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _airLinearDrag = 2.5f;
     [SerializeField] private float _fallMultiplier = 8f;
     [SerializeField] private float _lowJumpFallMultiplier = 5f;
-    private bool _canJump => Input.GetButtonDown("Jump") && _onGround;
+    [SerializeField] private float _hangTime;
+    [SerializeField] private float _hangCounter;
+    private bool _canJump => Input.GetButtonDown("Jump") && _hangCounter > 0.1f;
 
     [Header("Ground Collision Variables")]
     [SerializeField] private float _groundRaycastLength;
@@ -39,10 +41,26 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         _horizontalDirection = GetInput().x;
+
+        if(_onGround)
+        {
+            _hangCounter = _hangTime;
+        }
+        else
+        {
+            _hangCounter -= Time.deltaTime;
+        }
+
         if (_canJump)
         {
             Jump();
         }
+
+        if (Input.GetButtonUp("Jump") && _rb.velocity.y > 0)
+        {
+            _rb.velocity = new Vector2(_rb.velocity.x, _rb.velocity.y * .5f);
+        }
+
 
         if (Input.GetKeyDown(KeyCode.LeftArrow) && _facingRight == true)
         {
@@ -136,6 +154,7 @@ public class PlayerMovement : MonoBehaviour
     {
         _onGround = Physics2D.Raycast(transform.position + _groundRaycastOffset, Vector2.down, _groundRaycastLength, _groundLayer) ||
                     Physics2D.Raycast(transform.position - _groundRaycastOffset, Vector2.down, _groundRaycastLength, _groundLayer);
+
     }
 
     private void OnDrawGizmos()
