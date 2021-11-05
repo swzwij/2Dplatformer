@@ -5,6 +5,7 @@ using UnityEngine;
 public class Checkpoint : MonoBehaviour
 {
     private CheckpointManager cm;
+    [SerializeField] private GameObject _flag;
 
     private void Start()
     {
@@ -16,6 +17,7 @@ public class Checkpoint : MonoBehaviour
         if(other.CompareTag("Player"))
         {
             cm.lastCheckpointPos = transform.position;
+            _flag.SetActive(true);
         }
     }
 }
