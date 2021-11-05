@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Ground
   - Wall
+  - Coin
+  - Spike
+  - CM
   layers:
   - Default
   - TransparentFX
