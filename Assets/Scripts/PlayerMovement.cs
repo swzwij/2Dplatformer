@@ -32,6 +32,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private bool _onGround;
     [SerializeField] private Vector3 _groundRaycastOffset;
 
+    [Header("Particle Variables")]
+    [SerializeField] private ParticleSystem _dustEffect;
+    [SerializeField] private bool _spawnDust;
+
 
     private void Start()
     {
@@ -45,10 +49,17 @@ public class PlayerMovement : MonoBehaviour
         if(_onGround)
         {
             _hangCounter = _hangTime;
+
+            if(_spawnDust)
+            {
+                _dustEffect.Play();
+                _spawnDust = false;
+            }
         }
         else
         {
             _hangCounter -= Time.deltaTime;
+            _spawnDust = true;
         }
 
         if (_canJump)
