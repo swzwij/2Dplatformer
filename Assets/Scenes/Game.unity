@@ -22388,13 +22388,17 @@ MonoBehaviour:
   _movementAcceleration: 75
   _maxMoveSpeed: 10
   _groundLinearDrag: 15
-  _facingRight: 1
   _jumpForce: 32
   _airLinearDrag: 3.5
   _fallMultiplier: 8
   _lowJumpFallMultiplier: 5
   _hangTime: 0.2
   _hangCounter: 0
+  _horizontalDashSpeed: 100
+  _verticalDashSpeed: 50
+  _dashTime: 0
+  _startDashTime: 0.1
+  _dashDirction: 0
   _groundRaycastLength: 0.9
   _onGround: 0
   _groundRaycastOffset: {x: 0.48, y: 0, z: 0}

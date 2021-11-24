@@ -5,27 +5,34 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Components")]
-    private Rigidbody2D _rb;
+    private Rigidbody2D _rb;    
 
     [Header("Layer Masks")]
-    [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private LayerMask _groundLayer;    
 
     [Header("Movement Variables")]
-    [SerializeField] private float _movementAcceleration;
-    [SerializeField] private float _maxMoveSpeed;
-    [SerializeField] private float _groundLinearDrag;
-    public bool _facingRight = true;
-    private float _horizontalDirection;
-    private bool _changingDirection => (_rb.velocity.x > 0f && _horizontalDirection < 0f) || (_rb.velocity.x < 0f && _horizontalDirection > 0f);
+    [SerializeField] private float _movementAcceleration;    
+    [SerializeField] private float _maxMoveSpeed;           
+    [SerializeField] private float _groundLinearDrag;       
+    private bool _facingRight = true;                       
+    private float _horizontalDirection;                     
+    private bool _changingDirection => (_rb.velocity.x > 0f && _horizontalDirection < 0f) || (_rb.velocity.x < 0f && _horizontalDirection > 0f); 
 
     [Header("Jump Variables")]
-    [SerializeField] private float _jumpForce = 12f;
-    [SerializeField] private float _airLinearDrag = 2.5f;
-    [SerializeField] private float _fallMultiplier = 8f;
-    [SerializeField] private float _lowJumpFallMultiplier = 5f;
-    [SerializeField] private float _hangTime;
-    [SerializeField] private float _hangCounter;
+    [SerializeField] private float _jumpForce = 12f;                
+    [SerializeField] private float _airLinearDrag = 2.5f;           
+    [SerializeField] private float _fallMultiplier = 8f;            
+    [SerializeField] private float _lowJumpFallMultiplier = 5f;     
+    [SerializeField] private float _hangTime;                       
+    [SerializeField] private float _hangCounter;                    
     private bool _canJump => Input.GetButtonDown("Jump") && _hangCounter > 0.1f;
+
+    [Header("Dash Variables")]
+    [SerializeField] private float _horizontalDashSpeed;
+    [SerializeField] private float _verticalDashSpeed;
+    [SerializeField] private float _dashTime;
+    [SerializeField] private float _startDashTime;
+    [SerializeField] private int _dashDirction;
 
     [Header("Ground Collision Variables")]
     [SerializeField] private float _groundRaycastLength;
@@ -40,52 +47,103 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
+        _dashTime = _startDashTime;
     }
 
     private void Update()
     {
-        _horizontalDirection = GetInput().x;
+        _horizontalDirection = GetInput().x; 
 
-        if(_onGround)
+        if (_onGround)
         {
-            _hangCounter = _hangTime;
+            _hangCounter = _hangTime; 
 
-            if(_spawnDust)
+            if (_spawnDust)
             {
-                _dustEffect.Play();
-                _spawnDust = false;
+                _dustEffect.Play(); 
+                _spawnDust = false; 
             }
         }
         else
         {
-            _hangCounter -= Time.deltaTime;
-            _spawnDust = true;
+            _hangCounter -= Time.deltaTime; 
+            _spawnDust = true; 
         }
 
         if (_canJump)
         {
-            Jump();
+            Jump(); 
         }
-
+        
         if (Input.GetButtonUp("Jump") && _rb.velocity.y > 0)
         {
+            
             _rb.velocity = new Vector2(_rb.velocity.x, _rb.velocity.y * .5f);
         }
 
-
-        if (Input.GetKeyDown(KeyCode.LeftArrow) && _facingRight == true)
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && _facingRight)
         {
             Flip();
         }
-        else if (Input.GetKeyDown(KeyCode.RightArrow) && _facingRight == false)
+        else if (Input.GetKeyDown(KeyCode.RightArrow) && !_facingRight)
         {
             Flip();
+        }
+
+        if(_dashDirction == 0)
+        {
+            if(Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                _dashDirction = 1;
+            }
+            else if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                _dashDirction = 2;
+            }
+            else if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                _dashDirction = 3;
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                _dashDirction = 4;
+            }
+        }
+        else
+        {
+            if(_dashTime <= 0)
+            {
+                _dashDirction = 0;
+                _dashTime = _startDashTime;
+                _rb.velocity = Vector2.zero;
+            }
+            else
+            {
+                _dashTime -= Time.deltaTime;
+
+                if(_dashDirction == 1)
+                {
+                    _rb.velocity = Vector2.left * _horizontalDashSpeed;
+                }
+                else if (_dashDirction == 2)
+                {
+                    _rb.velocity = Vector2.right * _horizontalDashSpeed;
+                }
+                else if (_dashDirction == 3)
+                {
+                    _rb.velocity = Vector2.up * _verticalDashSpeed;
+                }
+                else if (_dashDirction == 4)
+                {
+                    _rb.velocity = Vector2.down * _verticalDashSpeed;
+                }
+            }
         }
     }
 
     private void FixedUpdate()
     {
-        CheckCollision();
+        CheckGroundCollision();
         MoveCharacter();
 
         if (_onGround)
@@ -157,15 +215,13 @@ public class PlayerMovement : MonoBehaviour
     private void Flip()
     {
         _facingRight = !_facingRight;
-
         transform.Rotate(Vector3.up * 180);
     }
 
-    private void CheckCollision()
+    private void CheckGroundCollision()
     {
         _onGround = Physics2D.Raycast(transform.position + _groundRaycastOffset, Vector2.down, _groundRaycastLength, _groundLayer) ||
                     Physics2D.Raycast(transform.position - _groundRaycastOffset, Vector2.down, _groundRaycastLength, _groundLayer);
-
     }
 
     private void OnDrawGizmos()
